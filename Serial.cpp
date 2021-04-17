@@ -11,8 +11,14 @@
 #include "Serial.hpp"
 #include "ISerial.hpp"
 
-Serial::Serial(const char * const portname) : portName(portname) 
+Serial::Serial()
 {
+	setUsbDev("test");
+}
+
+bool Serial::setUsbDev(const char * const portName)
+{
+	// check if fd is alredy assigned const value ??
 	fd = open(portName, O_RDWR | O_NOCTTY | O_SYNC );
 
 	if (fd < 0)
@@ -20,6 +26,7 @@ Serial::Serial(const char * const portname) : portName(portname)
 		printf("error %d opening %s: %s", errno, portName, strerror(errno));
 	}
 }
+
 
 Serial::~Serial()
 {

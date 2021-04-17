@@ -19,7 +19,13 @@ int main(void)
 	// dustSensor.readFromSerial(&buf[0U], 7U);
 	// return 0;
 
-	CGetter::getInstance();
+	ISerial* dustSensor = CGetter::getInstance().getSerialInstance();
+	dustSensor->setUsbDev("/dev/ttyUSB0");
+	dustSensor->setInterfaceAttribs(ISerial::baud115200, 0);
+	dustSensor->writeToSerial("hello!\n", 7U);
+	usleep ((7 + 25) * 100);
+	char buf [100];
+	dustSensor->readFromSerial(&buf[0U], 7U);;
 
 	return 0;
 }

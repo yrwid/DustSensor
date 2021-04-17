@@ -13,7 +13,7 @@ CGetter& CGetter::getInstance()
     return instance;
 }
 
-ISerial& getSerialInstance()
+ISerial* CGetter::getSerialInstance()
 {
-    return new Serial("/dev/ttyUSB0");
+    return new Serial();
 }

@@ -1,3 +1,6 @@
+#ifndef CGETTER_H
+#define CGETTER_H
+
 #include "ISerial.hpp"
 
 class CGetter
@@ -11,6 +14,8 @@ class CGetter
     
     public:
     static CGetter& getInstance();
-    ISerial& getSerialInstance();
+    ISerial* getSerialInstance();
 
 };
+
+#endif

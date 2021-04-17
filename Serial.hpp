@@ -2,7 +2,7 @@
 // // Serial.hpp                                  //
 // /////////////////////////////////////////////////
 
-#ifndef SERIAL_H    // To make sure you don't declare the function more than once by including the header multiple times.
+#ifndef SERIAL_H
 #define SERIAL_H
 
 #include <cstddef>
@@ -19,15 +19,12 @@ private:
     void setBlocking(int should_block);
 
 public:
-    // public constant 
-    static const int baud115200 = 0010002;
-    static const int baud9600   = 0000015;
-
-    Serial(const char * const portName);
+    Serial();
     ~Serial();
-    int setInterfaceAttribs(int speed, int parity) override;
-    int writeToSerial(const char* message, size_t len) override;
-    int readFromSerial(char* output, size_t len) override;
+    virtual bool setUsbDev(const char * const portName) override;
+    virtual int setInterfaceAttribs(int speed, int parity) override;
+    virtual int writeToSerial(const char* message, size_t len) override;
+    virtual int readFromSerial(char* output, size_t len) override;
 };
 
 #endif
