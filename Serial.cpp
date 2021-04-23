@@ -25,6 +25,8 @@ bool Serial::setUsbDev(const char * const portName)
 	{
 		printf("error %d opening %s: %s", errno, portName, strerror(errno));
 	}
+
+	return true;
 }
 
 
