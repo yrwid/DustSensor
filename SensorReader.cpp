@@ -1,8 +1,10 @@
 #include "SensorReader.hpp"
 #include <unistd.h>
+#include <iostream>
 
 SensorReader::SensorReader( ISerial* pSerial ) : m_pSerialPort( pSerial )
 {    
+    uint16_t parsedData[16U] = {0U};
 }
 
 bool SensorReader::readAllFromSensor()
@@ -12,7 +14,8 @@ bool SensorReader::readAllFromSensor()
     while (true)
     {
         m_pSerialPort->readFromSerial(reinterpret_cast<char*>(&outputBuffer[0U]), SENDED_DATA_FRAME_SIZE);
-        parseData(&outputBuffer[0U]);
+        const bool isDataGood = parseData(&outputBuffer[0U]);
+        displayData(isDataGood);
         usleep(700U);
     }
 
@@ -21,7 +24,6 @@ bool SensorReader::readAllFromSensor()
 
 bool SensorReader::parseData(uint8_t* data)
 {
-    uint16_t parsedData[16U] = {0U};
     uint8_t offset = 2U;
     bool retValue = false;
 
@@ -35,16 +37,23 @@ bool SensorReader::parseData(uint8_t* data)
         for (uint8_t iter = 0U; iter < 15U; iter++)
         {
              
-            if (iter == 13U || iter == 14U)
+            if (iter == 13U)
             {
-                parsedData[iter] = data[2*iter + offset];  // dla 14 zle jest
+                m_parsedData[iter] = data[28U];
+            }
+            else if (iter == 14U)
+            {
+                m_parsedData[iter] = data[29U];
+            }
+            else if (iter == 15U)
+            {
+                m_parsedData[iter] = synthesise(data[30U], data[31U]);
             }
             else
             {
-                parsedData[iter] = synthesise(data[iter*2U + offset], data[iter*2U + offset + 1U]);
+                m_parsedData[iter] = synthesise(data[iter*2U + offset], data[iter*2U + offset + 1U]);
             }
         }
-        parsedData[15U] = synthesise(data[30U], data[31U]);
 
         // calculate checksum
         for (uint8_t i = 0U; i < 28U; i++)
@@ -53,14 +62,50 @@ bool SensorReader::parseData(uint8_t* data)
         } 
 
         // indicate if parsed data is correct
-        retValue = (checkSum == parsedData[15U]) ? true : false;
+        retValue = (checkSum == m_parsedData[15U]) ? true : false;
     }
 
     return retValue;
 }
 
-uint16_t SensorReader::synthesise(uint8_t HiBit, uint8_t LoBit)
+inline uint16_t SensorReader::synthesise(uint8_t HiBit, uint8_t LoBit)
 {
     return (HiBit << 8U) + LoBit;
 }
 
+void SensorReader::displayData(bool isDataGood)
+{
+    const char* const displayMatrix[16U] = 
+        {
+            "Frame length: ",
+            "Concentration PM1_0_CF1: ",
+            "Concentration PM2_5_CF1: ",
+            "Concentration PM10_0_CF1: ",
+            "Concentration PM1_0_ATM: ",
+            "Concentration PM2_5_ATM: ",
+            "Concentration PM10_0_ATM: ",
+            "RawGt0_3um: ",
+            "RawGt0_5um: ",
+            "RawGt1_0um: ",
+            "RawGt2_5um: ",
+            "RawGt5_0um: ",
+            "RawGt10_0um: ",
+            "Version: ",
+            "Error code: ",
+            "Payload checksum: "
+        };
+
+    if (isDataGood)
+    {
+        std::cout << "#################################" << std::endl;
+        for (int i = 0U; i < 16U; i++)
+        {
+           std::cout << displayMatrix[i] << m_parsedData[i] << std::endl;
+        }
+        std::cout << "#################################" << std::endl;
+    }
+    else
+    {
+        std::cout << "Bad data" << std::endl;
+    }
+}

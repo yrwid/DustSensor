@@ -11,10 +11,12 @@ private:
     // private fields
     ISerial* m_pSerialPort;
     const uint8_t SENDED_DATA_FRAME_SIZE = 32U;
+    uint16_t m_parsedData[16U];
 
     // private methods
     bool parseData(uint8_t* data);
-    uint16_t synthesise(uint8_t HiBit, uint8_t LoBit);
+    inline uint16_t synthesise(uint8_t HiBit, uint8_t LoBit);
+    void displayData(bool isDataGoo);
 
 public:
     SensorReader(ISerial*);

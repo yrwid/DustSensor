@@ -4,6 +4,7 @@
 
 #include <unistd.h>
 #include "CGetter.hpp"
+#include <iostream>
 
 int main(void)
 {
@@ -23,9 +24,10 @@ int main(void)
 	dustSensor->setUsbDev("/dev/ttyUSB0");
 	dustSensor->setInterfaceAttribs(ISerial::baud115200, 0);
 	dustSensor->writeToSerial("hello!\n", 7U);
-	usleep ((7 + 25) * 100);
-	char buf [100];
-	dustSensor->readFromSerial(&buf[0U], 7U);;
+	usleep (7000); // needs 7 ms to loop information
+	char buf [100] = {0};
+	std::cout << dustSensor->readFromSerial(&buf[0U], 10U) << std::endl;
+	std::cout << buf << std::endl;
 
 	return 0;
 }

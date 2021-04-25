@@ -8,12 +8,15 @@
 #include <string.h>
 #include <termios.h>
 #include <unistd.h>
+#include <sys/ioctl.h>
+#include <iostream>
+
 #include "Serial.hpp"
 #include "ISerial.hpp"
 
 Serial::Serial()
 {
-	setUsbDev("test");
+	//setUsbDev("test");
 }
 
 bool Serial::setUsbDev(const char * const portName)
@@ -103,7 +106,17 @@ int Serial::writeToSerial(const char* message, size_t len)
 	return write(fd, message, len);
 }
 
+// int nread;
+// ioctl(Serial, FIONREAD, &nread);
 int Serial::readFromSerial(char* output, size_t len)
 {
-	return read(fd, output, len);  
+	int nread;
+	ioctl(fd, FIONREAD, &nread);
+	std::cout <<"data in buffer: " <<  nread <<std::endl;
+	if (nread >= len)
+	{
+		return read(fd, output, len);
+	}
+
+  return -1;
 }
