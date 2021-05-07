@@ -4,19 +4,48 @@
 
 SensorReader::SensorReader( ISerial* pSerial ) : m_pSerialPort( pSerial )
 {    
-    uint16_t parsedData[16U] = {0U};
+    //uint16_t parsedData[16U] = {0U};
 }
 
 bool SensorReader::readAllFromSensor()
 {
     uint8_t outputBuffer[SENDED_DATA_FRAME_SIZE] = {0U};
+    uint8_t flushCounter = 0U;
+
+    m_pSerialPort->flushPortBuffer();
 
     while (true)
     {
-        m_pSerialPort->readFromSerial(reinterpret_cast<char*>(&outputBuffer[0U]), SENDED_DATA_FRAME_SIZE);
-        const bool isDataGood = parseData(&outputBuffer[0U]);
-        displayData(isDataGood);
-        usleep(700U);
+        const bool result = (m_pSerialPort->readFromSerial(reinterpret_cast<char*>(&outputBuffer[0U]), SENDED_DATA_FRAME_SIZE) > 0) 
+                            ? true : false;
+        if (result)
+		{
+			for (uint8_t i = 0; i < 32U; i++)
+			{
+				printf("%d ", outputBuffer[i]);
+			}
+			std::cout << "\n";
+
+            const bool isDataGood = parseData(&outputBuffer[0U]);
+            for (uint8_t i = 0; i < 16U; i++)
+			{
+				printf("%d ", m_parsedData[i]);
+			}
+			std::cout << "\n";
+            displayData(isDataGood);
+		}
+        else
+        {
+            flushCounter++;
+        }
+
+        if (flushCounter == 20U)
+        {
+            flushCounter = 0U;
+            m_pSerialPort->flushPortBuffer();
+        }
+
+        usleep(100000); // 100ms 
     }
 
     return true;
@@ -34,7 +63,7 @@ bool SensorReader::parseData(uint8_t* data)
         uint32_t checkSum = data[0U] + data[1U];
 
         // parse data
-        for (uint8_t iter = 0U; iter < 15U; iter++)
+        for (uint8_t iter = 0U; iter < 16U; iter++)
         {
              
             if (iter == 13U)

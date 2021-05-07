@@ -25,6 +25,7 @@ public:
     virtual int setInterfaceAttribs(int speed, int parity) override;
     virtual int writeToSerial(const char* message, size_t len) override;
     virtual int readFromSerial(char* output, size_t len) override;
+    virtual void flushPortBuffer() override;
 };
 
 #endif

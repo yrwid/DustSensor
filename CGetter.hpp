@@ -2,6 +2,7 @@
 #define CGETTER_H
 
 #include "ISerial.hpp"
+#include "ISensorReader.hpp"
 
 class CGetter
 {
@@ -15,6 +16,7 @@ class CGetter
     public:
     static CGetter& getInstance();
     ISerial* getSerialInstance();
+    ISensorReader* getSensorReaderInstance(ISerial *s);
 
 };
 

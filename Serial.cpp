@@ -19,6 +19,11 @@ Serial::Serial()
 	//setUsbDev("test");
 }
 
+Serial::~Serial()
+{
+	close(fd);
+}
+
 bool Serial::setUsbDev(const char * const portName)
 {
 	// check if fd is alredy assigned const value ??
@@ -32,10 +37,23 @@ bool Serial::setUsbDev(const char * const portName)
 	return true;
 }
 
-
-Serial::~Serial()
+void Serial::flushPortBuffer()
 {
-	close(fd);
+	int nread;
+	while(nread > 0)
+	{
+		ioctl(fd, FIONREAD, &nread);
+		uint8_t* matrix = new uint8_t[nread];
+		read(fd, matrix, nread);
+		delete[] matrix;
+	}
+
+	ioctl(fd, FIONREAD, &nread);
+
+	if (nread != 0)
+	{
+		std::cout << "Port is not empty" << std::endl;
+	}
 }
 
 int Serial::setInterfaceAttribs (int speed, int parity)
@@ -112,7 +130,7 @@ int Serial::readFromSerial(char* output, size_t len)
 {
 	int nread;
 	ioctl(fd, FIONREAD, &nread);
-	std::cout <<"data in buffer: " <<  nread <<std::endl;
+	//std::cout <<"data in buffer: " <<  nread <<std::endl;
 	if (nread >= len)
 	{
 		return read(fd, output, len);

@@ -16,6 +16,7 @@ class ISerial
         virtual int setInterfaceAttribs(int, int) = 0;
         virtual int writeToSerial(const char*, size_t) = 0;
         virtual int readFromSerial(char*, size_t) = 0;
+        virtual void flushPortBuffer() = 0;
 };
 
 #endif
