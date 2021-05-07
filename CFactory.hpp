@@ -1,20 +1,20 @@
-#ifndef CGETTER_H
-#define CGETTER_H
+#ifndef CFACTORY_H
+#define CFACTORY_H
 
 #include "ISerial.hpp"
 #include "ISensorReader.hpp"
 
-class CGetter
+class CFactory
 {
     private:
     // Private Constructor
-    CGetter();
+    CFactory();
     // Stop the compiler generating methods of copy the object
-    CGetter(CGetter const& copy);            // Not Implemented
-    CGetter& operator=(CGetter const& copy); // Not Implemented
+    CFactory(CFactory const& copy);            // Not Implemented
+    CFactory& operator=(CFactory const& copy); // Not Implemented
     
     public:
-    static CGetter& getInstance();
+    static CFactory& getInstance();
     ISerial* getSerialInstance();
     ISensorReader* getSensorReaderInstance(ISerial *s);
 

@@ -1,25 +1,25 @@
-#include "CGetter.hpp"
+#include "CFactory.hpp"
 #include "Serial.hpp"   
 #include "SensorReader.hpp"
 
-CGetter::CGetter()
+CFactory::CFactory()
 {}
 
-CGetter& CGetter::getInstance()
+CFactory& CFactory::getInstance()
 {
     // The only instance
     // Guaranteed to be lazy initialized
     // Guaranteed that it will be destroyed correctly
-    static CGetter instance;
+    static CFactory instance;
     return instance;
 }
 
-ISerial* CGetter::getSerialInstance()
+ISerial* CFactory::getSerialInstance()
 {
     return new Serial();
 }
 
-ISensorReader* CGetter::getSensorReaderInstance(ISerial* serialPort)
+ISensorReader* CFactory::getSensorReaderInstance(ISerial* serialPort)
 {
     return new SensorReader(serialPort);
 }

@@ -3,7 +3,7 @@
 // /////////////////////////////////////////////////
 
 #include <unistd.h>
-#include "CGetter.hpp"
+#include "CFactory.hpp"
 #include <iostream>
 #include <signal.h>
 
@@ -31,10 +31,10 @@ void configurePorts(ISerial* port)
 int main(void)
 {
 	initSignals();
-	ISerial* port = CGetter::getInstance().getSerialInstance();
+	ISerial* port = CFactory::getInstance().getSerialInstance();
 	configurePorts(port);
 
-	ISensorReader* dustSensor = CGetter::getInstance().getSensorReaderInstance(port);
+	ISensorReader* dustSensor = CFactory::getInstance().getSensorReaderInstance(port);
 	dustSensor->readAllFromSensor();
 	//dustSensor->writeToSerial("hello!\n", 7U);
 	
