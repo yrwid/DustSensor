@@ -4,7 +4,6 @@
 
 SensorReader::SensorReader( ISerial* pSerial ) : m_pSerialPort( pSerial )
 {    
-    //uint16_t parsedData[16U] = {0U};
 }
 
 bool SensorReader::readAllFromSensor()
@@ -20,14 +19,14 @@ bool SensorReader::readAllFromSensor()
                             ? true : false;
         if (result)
 		{
-			for (uint8_t i = 0; i < 32U; i++)
+			for (uint8_t i = 0; i < SENDED_DATA_FRAME_SIZE; i++)
 			{
 				printf("%d ", outputBuffer[i]);
 			}
 			std::cout << "\n";
 
             const bool isDataGood = parseData(&outputBuffer[0U]);
-            for (uint8_t i = 0; i < 16U; i++)
+            for (uint8_t i = 0; i < SENDED_DATA_FRAME_SIZE/2U; i++)
 			{
 				printf("%d ", m_parsedData[i]);
 			}
@@ -39,7 +38,7 @@ bool SensorReader::readAllFromSensor()
             flushCounter++;
         }
 
-        if (flushCounter == 20U)
+        if (flushCounter >= 20U)
         {
             flushCounter = 0U;
             m_pSerialPort->flushPortBuffer();
@@ -53,11 +52,13 @@ bool SensorReader::readAllFromSensor()
 
 bool SensorReader::parseData(uint8_t* data)
 {
-    uint8_t offset = 2U;
+    const uint8_t offset = 2U;
     bool retValue = false;
+    const uint8_t frameBegining[] = {0x42U, 0x4dU};
+    const uint8_t checkSumLength = 28U;
 
     // check id we are on beggining of the frame 
-    if ( data[0U] == 0x42U && data[1U] == 0x4dU )
+    if ( data[0U] == frameBegining[0U] && data[1U] == frameBegining[1U])
     {
         // add initial check sum
         uint32_t checkSum = data[0U] + data[1U];
@@ -65,7 +66,6 @@ bool SensorReader::parseData(uint8_t* data)
         // parse data
         for (uint8_t iter = 0U; iter < 16U; iter++)
         {
-             
             if (iter == 13U)
             {
                 m_parsedData[iter] = data[28U];
@@ -85,7 +85,7 @@ bool SensorReader::parseData(uint8_t* data)
         }
 
         // calculate checksum
-        for (uint8_t i = 0U; i < 28U; i++)
+        for (uint8_t i = 0U; i < checkSumLength; i++)
         {
             checkSum += data[offset + i];
         } 
@@ -127,7 +127,7 @@ void SensorReader::displayData(bool isDataGood)
     if (isDataGood)
     {
         std::cout << "#################################" << std::endl;
-        for (int i = 0U; i < 16U; i++)
+        for (int i = 0U; i < SENDED_DATA_FRAME_SIZE/2U; i++)
         {
            std::cout << displayMatrix[i] << m_parsedData[i] << std::endl;
         }

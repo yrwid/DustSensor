@@ -12,8 +12,8 @@ class Serial : public ISerial
 {
 private:
     // private fields
-    int fd;
-    const char* portName;
+    int m_FD;
+    const char* m_pPortName;
 
     // private methods
     void setBlocking(int should_block);

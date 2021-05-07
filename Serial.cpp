@@ -20,15 +20,16 @@ Serial::Serial()
 
 Serial::~Serial()
 {
-	close(fd);
+	close(m_FD);
 }
 
 bool Serial::setUsbDev(const char * const portName)
 {
+	m_pPortName = portName;
 	// check if fd is alredy assigned const value ??
-	fd = open(portName, O_RDWR | O_NOCTTY | O_SYNC );
+	m_FD = open(portName, O_RDWR | O_NOCTTY | O_SYNC );
 
-	if (fd < 0)
+	if (m_FD < 0)
 	{
 		printf("error %d opening %s: %s", errno, portName, strerror(errno));
 	}
@@ -41,13 +42,13 @@ void Serial::flushPortBuffer()
 	int nread;
 	while(nread > 0)
 	{
-		ioctl(fd, FIONREAD, &nread);
+		ioctl(m_FD, FIONREAD, &nread);
 		uint8_t* matrix = new uint8_t[nread];
-		read(fd, matrix, nread);
+		read(m_FD, matrix, nread);
 		delete[] matrix;
 	}
 
-	ioctl(fd, FIONREAD, &nread);
+	ioctl(m_FD, FIONREAD, &nread);
 
 	if (nread != 0)
 	{
@@ -59,9 +60,9 @@ int Serial::setInterfaceAttribs (int speed, int parity)
 {
 	struct termios tty;
 
-	if (tcgetattr(fd, &tty) != 0)
+	if (tcgetattr(m_FD, &tty) != 0)
 	{
-		printf("error %d from tcgetattr, filedestriptor %d \n", errno, fd);
+		printf("error %d from tcgetattr, filedestriptor %d \n", errno, m_FD);
 		return -1;
 	}
 
@@ -87,7 +88,7 @@ int Serial::setInterfaceAttribs (int speed, int parity)
 	tty.c_cflag &= ~CSTOPB;
 	tty.c_cflag &= ~CRTSCTS;
 
-	if (tcsetattr (fd, TCSANOW, &tty) != 0)
+	if (tcsetattr (m_FD, TCSANOW, &tty) != 0)
 	{
 		printf("error %d from tcsetattr", errno);
 		return -1;
@@ -103,7 +104,7 @@ void Serial::setBlocking (int should_block)
 	struct termios tty;
 	memset (&tty, 0, sizeof tty);
 
-	if (tcgetattr (fd, &tty) != 0)
+	if (tcgetattr (m_FD, &tty) != 0)
 	{
 		printf("error %d from tggetattr", errno);
 		return;
@@ -112,7 +113,7 @@ void Serial::setBlocking (int should_block)
 	tty.c_cc[VMIN]  = should_block ? 1 : 0;
 	tty.c_cc[VTIME] = 5;            // 0.5 seconds read timeout
 
-	if (tcsetattr(fd, TCSANOW, &tty) != 0)
+	if (tcsetattr(m_FD, TCSANOW, &tty) != 0)
 	{
 		printf("error %d setting term attributes", errno);
 	}
@@ -120,7 +121,7 @@ void Serial::setBlocking (int should_block)
 
 int Serial::writeToSerial(const char* message, size_t len)
 {
-	return write(fd, message, len);
+	return write(m_FD, message, len);
 }
 
 // int nread;
@@ -128,10 +129,10 @@ int Serial::writeToSerial(const char* message, size_t len)
 int Serial::readFromSerial(char* output, size_t len)
 {
 	int nread;
-	ioctl(fd, FIONREAD, &nread);
+	ioctl(m_FD, FIONREAD, &nread);
 	if (nread >= len)
 	{
-		return read(fd, output, len);
+		return read(m_FD, output, len);
 	}
 
   return -1;

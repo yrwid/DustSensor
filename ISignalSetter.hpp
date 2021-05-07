@@ -1,0 +1,4 @@
+#ifndef IF_SIGNAL_SETTER_HPP
+#define IF_SIGNAL_SETTER_HPP
+
+#endif
