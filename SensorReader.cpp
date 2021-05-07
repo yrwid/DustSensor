@@ -131,10 +131,10 @@ void SensorReader::displayData(bool isDataGood)
         {
            std::cout << displayMatrix[i] << m_parsedData[i] << std::endl;
         }
-        std::cout << "#################################" << std::endl;
+        std::cout << "################################# \n\n" << std::endl;
     }
     else
     {
-        std::cout << "Bad data" << std::endl;
+        std::cout << "Bad data payload" << std::endl;
     }
 }

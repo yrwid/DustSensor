@@ -10,7 +10,6 @@
 #include <unistd.h>
 #include <sys/ioctl.h>
 #include <iostream>
-
 #include "Serial.hpp"
 #include "ISerial.hpp"
 
@@ -130,7 +129,6 @@ int Serial::readFromSerial(char* output, size_t len)
 {
 	int nread;
 	ioctl(fd, FIONREAD, &nread);
-	//std::cout <<"data in buffer: " <<  nread <<std::endl;
 	if (nread >= len)
 	{
 		return read(fd, output, len);

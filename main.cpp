@@ -13,22 +13,26 @@ void my_handler(int s){
 
 }
 
-int main(void)
+void initSignals()
 {
-	// break signal - fnct
 	struct sigaction sigIntHandler;
     sigIntHandler.sa_handler = my_handler;
     sigemptyset(&sigIntHandler.sa_mask);
     sigIntHandler.sa_flags = 0;
     sigaction(SIGINT, &sigIntHandler, NULL);
-	// end
+}
 
-	ISerial* port = CGetter::getInstance().getSerialInstance();
-
-	// configure port - fnct
+void configurePorts(ISerial* port)
+{
 	port->setUsbDev("/dev/ttyUSB0");
 	port->setInterfaceAttribs(ISerial::baud9600, 0);
-	// end
+}
+
+int main(void)
+{
+	initSignals();
+	ISerial* port = CGetter::getInstance().getSerialInstance();
+	configurePorts(port);
 
 	ISensorReader* dustSensor = CGetter::getInstance().getSensorReaderInstance(port);
 	dustSensor->readAllFromSensor();
