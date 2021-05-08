@@ -17,12 +17,14 @@ private:
 
     // private methods
     void setBlocking(int should_block);
+    void configurePorts(const char* devName, const int baud, int isBlocking);
+    bool setUsbDev(const char * const portName);
+    int setInterfaceAttribs(int speed, int parity);
 
 public:
-    Serial();
+    Serial(const char* devName, const int baud, int isBlocking);
     ~Serial();
-    virtual bool setUsbDev(const char * const portName) override;
-    virtual int setInterfaceAttribs(int speed, int parity) override;
+
     virtual int writeToSerial(const char* message, size_t len) override;
     virtual int readFromSerial(char* output, size_t len) override;
     virtual void flushPortBuffer() override;

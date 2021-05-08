@@ -7,7 +7,6 @@ private:
 public:
     SignalSetter();
     ~SignalSetter();
-    void attacheInterruptSignal();
     void initSignals();
 };
 

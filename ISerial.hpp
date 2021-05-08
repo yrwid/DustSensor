@@ -12,8 +12,6 @@ class ISerial
         static const int baud9600   = 0000015;
 
         virtual ~ISerial() {}
-        virtual bool setUsbDev(const char * const) = 0;
-        virtual int setInterfaceAttribs(int, int) = 0;
         virtual int writeToSerial(const char*, size_t) = 0;
         virtual int readFromSerial(char*, size_t) = 0;
         virtual void flushPortBuffer() = 0;

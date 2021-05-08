@@ -32,13 +32,14 @@ bool SensorReader::readAllFromSensor()
 			}
 			std::cout << "\n";
             displayData(isDataGood);
-		}
-        else
-        {
-            flushCounter++;
-        }
 
-        if (flushCounter >= 20U)
+            if (!isDataGood)
+            {
+                flushCounter++;
+            }
+		}
+
+        if (flushCounter >= 5U)
         {
             flushCounter = 0U;
             m_pSerialPort->flushPortBuffer();

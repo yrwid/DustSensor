@@ -13,14 +13,20 @@
 #include "Serial.hpp"
 #include "ISerial.hpp"
 
-Serial::Serial()
+Serial::Serial(const char* devName, const int baud, int isBlocking)
 {
-	//setUsbDev("test");
+	configurePorts(devName, baud, isBlocking);
 }
 
 Serial::~Serial()
 {
 	close(m_FD);
+}
+
+void Serial::configurePorts(const char* devName, const int baud, int isBlocking)
+{
+	setUsbDev(devName);
+	setInterfaceAttribs(baud, isBlocking);
 }
 
 bool Serial::setUsbDev(const char * const portName)

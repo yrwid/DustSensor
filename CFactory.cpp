@@ -1,6 +1,7 @@
 #include "CFactory.hpp"
 #include "Serial.hpp"   
 #include "SensorReader.hpp"
+#include "SignalSetter.hpp"
 
 CFactory::CFactory()
 {}
@@ -14,12 +15,17 @@ CFactory& CFactory::getInstance()
     return instance;
 }
 
-ISerial* CFactory::getSerialInstance()
+ISerial* CFactory::getSerialInstance(const char* devName, const int baud, int isBlocking)
 {
-    return new Serial();
+    return new Serial(devName, baud, isBlocking);
 }
 
 ISensorReader* CFactory::getSensorReaderInstance(ISerial* serialPort)
 {
     return new SensorReader(serialPort);
+}
+
+void CFactory::enableSignal()
+{
+    signalObj = new SignalSetter();
 }
