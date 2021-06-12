@@ -5,5 +5,6 @@ class ISensorReader
 {
     public:
         virtual bool readAllFromSensor() = 0;
+        virtual bool readSingleFromSensor() = 0;
 };
 #endif

@@ -45,13 +45,15 @@ bool Serial::setUsbDev(const char * const portName)
 
 void Serial::flushPortBuffer()
 {
-	int nread;
+	int nread = 10;
 	while(nread > 0)
 	{
+		usleep(50000); // 50ms 
 		ioctl(m_FD, FIONREAD, &nread);
 		uint8_t* matrix = new uint8_t[nread];
 		read(m_FD, matrix, nread);
 		delete[] matrix;
+		std::cout << "nread: "<< nread << std::endl;
 	}
 
 	ioctl(m_FD, FIONREAD, &nread);
@@ -135,11 +137,16 @@ int Serial::writeToSerial(const char* message, size_t len)
 int Serial::readFromSerial(char* output, size_t len)
 {
 	int nread;
-	ioctl(m_FD, FIONREAD, &nread);
-	if (nread >= len)
+	while(nread != len)
 	{
-		return read(m_FD, output, len);
+		ioctl(m_FD, FIONREAD, &nread);
+		std::cout<<"size of buffer data: " << nread <<std::endl;
+		if (nread >= len)
+		{
+			return read(m_FD, output, len);
+		}
+		usleep(500); // 50ms 
 	}
 
-  return -1;
+  return 1;
 }

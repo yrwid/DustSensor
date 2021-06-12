@@ -2,23 +2,25 @@
 #include <unistd.h>
 #include <iostream>
 
-SensorReader::SensorReader( ISerial* pSerial ) : m_pSerialPort( pSerial )
-{    
+SensorReader::SensorReader( ISerial* pSerial ) : 
+    m_pSerialPort( pSerial ),
+    m_passiveMode(false)
+{
 }
 
 bool SensorReader::readAllFromSensor()
 {
     uint8_t outputBuffer[SENDED_DATA_FRAME_SIZE] = {0U};
     uint8_t flushCounter = 0U;
-
-    m_pSerialPort->flushPortBuffer();
-
-    while (true)
+    
+    std::cout<<"before petla"<<std::endl;
+    do
     {
-        const bool result = (m_pSerialPort->readFromSerial(reinterpret_cast<char*>(&outputBuffer[0U]), SENDED_DATA_FRAME_SIZE) > 0) 
-                            ? true : false;
+        const bool result = (m_pSerialPort->readFromSerial(reinterpret_cast<char*>(&outputBuffer[0U]), SENDED_DATA_FRAME_SIZE) > 0); 
+                            
         if (result)
 		{
+            std::cout<<"w IFie"<<std::endl;
 			for (uint8_t i = 0; i < SENDED_DATA_FRAME_SIZE; i++)
 			{
 				printf("%d ", outputBuffer[i]);
@@ -32,21 +34,12 @@ bool SensorReader::readAllFromSensor()
 			}
 			std::cout << "\n";
             displayData(isDataGood);
-
-            if (!isDataGood)
-            {
-                flushCounter++;
-            }
 		}
 
-        if (flushCounter >= 5U)
-        {
-            flushCounter = 0U;
-            m_pSerialPort->flushPortBuffer();
-        }
+        //m_pSerialPort->flushPortBuffer();
 
-        usleep(100000); // 100ms 
-    }
+        usleep(500000); // 700ms 
+    } while (!m_passiveMode);
 
     return true;
 }
@@ -138,4 +131,44 @@ void SensorReader::displayData(bool isDataGood)
     {
         std::cout << "Bad data payload" << std::endl;
     }
+}
+
+bool SensorReader::readSingleFromSensor()
+{
+    // last 2 bytes are sum of previous ones. 
+    const uint8_t chngeToPassiveMode[]  = {0x42, 0x4d, 0xe1, 0x00, 0x00, 0x01, 0x70 }; // Passive
+    const uint8_t chngeToActiveMode[]   = {0x42, 0x4d, 0xe1, 0x00, 0x01, 0x01, 0x71 }; // Active
+    const uint8_t readFromPassiveMode[] = {0x42, 0x4d, 0xe2, 0x00, 0x00, 0x01, 0x71 }; // Read from passive mode
+    const uint8_t enableSleepMode[]     = {0x42, 0x4d, 0xe4, 0x00, 0x00, 0x01, 0x73 }; // Sleep mode
+    const uint8_t wakeupFromSleepMode[] = {0x42, 0x4d, 0xe4, 0x00, 0x01, 0x01, 0x74 }; // wake up from sleep mode
+
+    int resultOfSend = 0;
+
+    if(!m_passiveMode)
+    {
+        usleep(100000); // 100ms 
+        resultOfSend = m_pSerialPort->writeToSerial(reinterpret_cast<const char*>(chngeToPassiveMode), 
+                                                    sizeof(chngeToPassiveMode)/sizeof(chngeToPassiveMode[0U]));
+
+        std::cout<<"value of send: "<< resultOfSend<<std::endl;
+        if (resultOfSend < 0)
+        {
+            return false;
+        }
+    }
+
+    m_passiveMode = true;
+    usleep(700000); // 100ms 
+    m_pSerialPort->flushPortBuffer();
+
+    resultOfSend = m_pSerialPort->writeToSerial(reinterpret_cast<const char*>(readFromPassiveMode), 
+                                                sizeof(readFromPassiveMode)/sizeof(readFromPassiveMode[0U]));
+
+    if (resultOfSend < 0)
+    {
+        return false;
+    }
+
+    usleep(10000); // 100ms 
+    return readAllFromSensor();
 }

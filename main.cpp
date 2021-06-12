@@ -3,14 +3,20 @@
 // /////////////////////////////////////////////////
 
 #include "CFactory.hpp"
+#include "unistd.h"
 
 int main(void)
 {
 	CFactory::getInstance().enableSignal();
 	ISerial* port = CFactory::getInstance().getSerialInstance("/dev/ttyUSB0", ISerial::baud9600, 0);
 	ISensorReader* dustSensor = CFactory::getInstance().getSensorReaderInstance(port);
-	dustSensor->readAllFromSensor();
-	//dustSensor->writeToSerial("hello!\n", 7U);
+	while(true)
+	{
+		dustSensor->readSingleFromSensor();
+		usleep(700000); 
+	}
+
+	//dustSensor->readAllFromSensor();
 	
 	return 0;
 }
